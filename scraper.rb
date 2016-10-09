@@ -1,21 +1,25 @@
 require 'nokogiri'
 require 'open-uri'
+require 'mechanize'
 require 'json'
 require 'pry'
 
+agent = Mechanize.new
 url = 'http://www.comics.org/on_sale_weekly/'
-page = Nokogiri::HTML(open(url))
+page = agent.get(url)
+# puts page.uri
 blk = lambda {|k,v| k[v] = Hash.new(&blk)}
 this_week = Hash.new(&blk)
 
 rows = page.css('tr')
+next_link = page.link_with(text: 'Next >')
+page= next_link.click
 
 comics = rows.collect do |row|
-  comic = {}
-  publisher = row.css('td a').map {|a| a.text if a['href'].match('/publisher')}.compact.uniq
-  title = row.css('td a').map {|a| a.text if a['href'].match('/series')}.compact.uniq
-  issue = row.css('td a').map {|a| a.text if a['href'].match('/issue')}.compact.uniq
-
+  comic = Hash.new
+  publisher = row.css('td a').map {|a| a.text if a['href'].match('/publisher')}.compact.uniq.join(" , ")
+  title = row.css('td a').map {|a| a.text if a['href'].match('/series')}.compact.uniq.join(" , ")
+  issue = row.css('td a').map {|a| a.text if a['href'].match('/issue')}.compact.uniq.join(" , ")
   [
     [:publisher, publisher],
     [:title, title],
@@ -25,4 +29,7 @@ comics = rows.collect do |row|
   end
   comic
 end
-pp comics
+
+# puts page.uri
+# binding.pry
+puts comics
