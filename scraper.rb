@@ -2,7 +2,6 @@ require 'nokogiri'
 require 'open-uri'
 require 'mechanize'
 require 'json'
-require 'pry'
 
 
 agent = Mechanize.new
@@ -41,5 +40,4 @@ comics = rows.collect do |row|
   comic
 end
 
-# binding.pry
 puts comics
